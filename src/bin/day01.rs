@@ -44,14 +44,14 @@ fn first_repeated(lines: Lines) -> Result<i32, &'static str>{
     let mut total = 0;
     totals.insert(total);
 
-    for set_of_lines in iter::repeat(lines) {
-        for number in cast_lines_to_numbers(set_of_lines) {
-            total = total + number;
-            if totals.contains(&total) {
-                return Ok(total);
-            }
-            totals.insert(total);
+    let looped_changes = iter::repeat(lines)
+        .flat_map(cast_lines_to_numbers);
+    for number in looped_changes {
+        total = total + number;
+        if totals.contains(&total) {
+            return Ok(total);
         }
+        totals.insert(total);
     }
     return Err("no total repeated");
 }
