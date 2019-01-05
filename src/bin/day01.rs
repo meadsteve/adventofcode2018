@@ -1,9 +1,12 @@
+extern crate core;
+
 use std::io;
 use std::io::Read;
 use std::str::Lines;
 use std::io::Write;
 use std::iter::Map;
 use std::collections::HashSet;
+use core::iter;
 
 type ExecutionResult<T> = Result<T, Box<::std::error::Error>>;
 
@@ -41,12 +44,14 @@ fn first_repeated(lines: Lines) -> Result<i32, &'static str>{
     let mut total = 0;
     totals.insert(total);
 
-    for number in cast_lines_to_numbers(lines) {
-        total = total + number;
-        if totals.contains(&total) {
-            return Ok(total);
+    for set_of_lines in iter::repeat(lines) {
+        for number in cast_lines_to_numbers(set_of_lines) {
+            total = total + number;
+            if totals.contains(&total) {
+                return Ok(total);
+            }
+            totals.insert(total);
         }
-        totals.insert(total);
     }
     return Err("no total repeated");
 }
@@ -69,4 +74,14 @@ fn it_finds_the_first_repeated_intermediate_total() {
     let result = first_repeated(test_input.lines());
     assert_eq!(result.is_ok(), true);
     assert_eq!(result.unwrap_or_default(), 1)
+}
+
+#[test]
+fn it_will_loop_over_the_input_to_find_repeats() {
+    let test_input = "1\n2\n2\n-3";
+//                         1  3  5   2
+//                         3
+    let result = first_repeated(test_input.lines());
+    assert_eq!(result.is_ok(), true);
+    assert_eq!(result.unwrap_or_default(), 3)
 }
